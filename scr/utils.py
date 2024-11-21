@@ -29,21 +29,21 @@ def extract_image_coordinates_from_xml_to_dict(path):
 
 def get_image_path(path_to_xml):
     filename_image = xet.parse(path_to_xml).getroot().find('filename').text
-    filepath_image = os.path.join('data/images',filename_image)
+    filepath_image = os.path.join('data/images', filename_image)
     return filepath_image
 
 
 
-def data_normalize(license_plate_coordinates, image_path):
+def data_normalize(license_plate_coordinates, image_path_list):
     
     # labels = df.iloc[:,1:].values
     data = []
     output = []
     
-    for ind in range(len(image_path)):
-        image = image_path[ind]
+    for ind in range(len(image_path_list)):
+        image = image_path_list[ind]
         img_arr = cv2.imread(image)
-        h,w,d = img_arr.shape
+        h, w, d = img_arr.shape
         # Prepprocesing
         load_image = load_img(image,target_size=(224,224))
         load_image_arr = img_to_array(load_image)
@@ -57,5 +57,5 @@ def data_normalize(license_plate_coordinates, image_path):
         data.append(norm_load_image_arr)
         output.append(label_norm)
 
-        return data, output
+    return data, output
     
