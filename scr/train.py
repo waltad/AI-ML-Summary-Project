@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras.models import Model
-from tensorflow.keras.callbacks import TensorBoard
+import datetime
 from tensorflow.keras.applications import InceptionResNetV2
 from tensorflow.keras.layers import Dense, Dropout, Flatten, Input
 
@@ -25,11 +25,14 @@ model = Model(inputs=inception_resnet.input, outputs=headmodel)
 model.compile(loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4))
 model.summary()
 
-tfb = TensorBoard('object_detection')
-history = model.fit(x=x_train, y=y_train, batch_size=10, epochs=180, validation_data=(x_test,y_test), callbacks=[tfb])
+# tensorboard --logdir logs/fit
+# tensorboard --logdir logs/gradient_tape
+log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+history = model.fit(x=x_train, y=y_train, batch_size=10, epochs=180, validation_data=(x_test,y_test), callbacks=[tensorboard_callback])
 
-model.save('./object_detection.h5')
+model.save('./models/object_detection.keras')
 
 # Load model
-model = tf.keras.models.load_model('./object_detection.h5')
+model = tf.keras.models.load_model('./models/object_detection.keras')
 print('Model loaded Sucessfully')
