@@ -35,6 +35,7 @@ log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 history = model.fit(x=x_train, y=y_train, batch_size=10, epochs=180, validation_data=(x_test,y_test), callbacks=[tensorboard_callback])
 
+# In order for the model to be saved, you must create a directory called "models"
 model.save('./models/object_detection.keras')
 
 # Load model
