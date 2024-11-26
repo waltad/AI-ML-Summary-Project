@@ -22,7 +22,11 @@ headmodel = Dense(4, activation='sigmoid')(headmodel)
 model = Model(inputs=inception_resnet.input, outputs=headmodel)
 
 # Complie model
-model.compile(loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4))
+model.compile(
+    loss='mse',
+    optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
+    metrics=['accuracy']
+    )
 model.summary()
 
 # tensorboard --logdir logs/fit
