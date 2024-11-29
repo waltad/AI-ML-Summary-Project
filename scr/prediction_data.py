@@ -5,7 +5,7 @@ import plotly.express as px
 
 
 # Load model
-model = tf.keras.models.load_model('./models/object_detection.keras')
+model = tf.keras.models.load_model('./models/license_plate_frame_recognition_model.keras')
 print('Model loaded Sucessfully')
 
 path = 'data/TEST/TEST.jpeg'
