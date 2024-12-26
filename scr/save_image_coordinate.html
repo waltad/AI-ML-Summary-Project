@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw Rectangle and Save Coordinates</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <input type="file" id="fileInput" accept="image/*">
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let img = new Image();
+        let startX, startY, endX, endY, isDrawing = false;
+
+        // Load the image onto the canvas
+        document.getElementById('fileInput').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+        };
+
+        // Mouse events for drawing the rectangle
+        canvas.addEventListener('mousedown', (event) => {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            startX = event.clientX - rect.left;
+            startY = event.clientY - rect.top;
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            endX = event.clientX - rect.left;
+            endY = event.clientY - rect.top;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(startX, startY, endX - startX, endY - startY);
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+            const coordinates = {
+                Xmin: Math.min(startX, endX),
+                Ymin: Math.min(startY, endY),
+                Xmax: Math.max(startX, endX),
+                Ymax: Math.max(startY, endY),
+            };
+            console.log('Coordinates:', coordinates);
+            alert(`Coordinates: ${JSON.stringify(coordinates)}`);
+        });
+    </script>
+</body>
+</html>
