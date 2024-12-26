@@ -25,11 +25,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-data
-data2
-licenseplatesoverview.ipynb
-models
-mlruns
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -165,3 +160,11 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+data
+data2
+licenseplatesoverview.ipynb
+models
+mlruns
+test*
+new_data
