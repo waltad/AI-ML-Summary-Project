@@ -6,8 +6,6 @@ import xml.etree.ElementTree as ET
 import os, sys
 
 
-run = True
-
 # Function to let the user select a rectangular frame
 def on_mouse_click(event):
     global x_start, y_start, rect_id
@@ -53,12 +51,7 @@ def save_coordinates_as_xml(directory, file_name, coordinates):
         tree.write(xml_file)
     print(f"Coordinates saved to {xml_filename}")
 
-def exiting_the_program():
-     global run
-     run = False
-
-
-while run:
+while True:
     # Select an image
     root = tk.Tk()
     root.withdraw()
@@ -72,7 +65,7 @@ while run:
     
     # Check if the dialog was cancelled
     if not file_path:
-        print("No files selected. Exiting program.")
+        print("No file selected. Exiting program.")
         sys.exit()  # End the program
 
     image = Image.open(file_path)
@@ -98,7 +91,7 @@ while run:
     root.mainloop()
 
     # Write and save coordinates
-    if run and x_min != x_max and y_min != y_max:
+    if x_min != x_max and y_min != y_max:
         
         # Image file path (replace with your file selection logic)
         image_name = os.path.splitext(os.path.basename(file_path))[0]  # Extract the base name without extension
