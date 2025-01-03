@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageTk
 import tkinter as tk
 from tkinter import filedialog
 import json
@@ -26,6 +26,52 @@ def on_mouse_release(event):
     x_min, y_min = min(x_start, event.x), min(y_start, event.y)
     x_max, y_max = max(x_start, event.x), max(y_start, event.y)
     root.quit()
+
+
+def display_image(image_path):
+    # Create a Tkinter window
+    root = tk.Tk()
+    root.title("Image Viewer")
+
+    # Get screen dimensions
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+
+    # Load the image
+    image = Image.open(image_path)
+
+    # Calculate the resized dimensions to fit the screen
+    aspect_ratio = image.width / image.height
+    if image.width > screen_width or image.height > screen_height:
+        if screen_width / screen_height < aspect_ratio:
+            new_width = screen_width
+            new_height = int(screen_width / aspect_ratio)
+        else:
+            new_height = screen_height
+            new_width = int(screen_height * aspect_ratio)
+    else:
+        # Image fits within the screen, no resizing needed
+        new_width, new_height = image.width, image.height
+
+    # Resize the image
+    image_resized = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+    # Convert the image to a format Tkinter can use
+    photo = ImageTk.PhotoImage(image_resized)
+
+    # Create a canvas to display the image
+    canvas = tk.Canvas(root, width=new_width, height=new_height)
+    canvas.pack()
+
+    # Display the image in the canvas
+    canvas.create_image(0, 0, anchor=tk.NW, image=photo)
+
+    # Add an Exit button
+    exit_button = tk.Button(root, text="Exit", command=root.destroy)
+    exit_button.pack()
+
+    # Run the Tkinter main loop
+    root.mainloop()
 
 
 def save_image_with_coordinates(
@@ -87,6 +133,8 @@ while True:
         print("No file selected. Exiting program.")
         sys.exit()  # End the program
 
+    # display_image(file_path)
+
     image = Image.open(file_path)
 
     # Create a tkinter window to select a frame
@@ -98,7 +146,7 @@ while True:
         height=image.height
     )
     canvas.pack()
-    photo = tk.PhotoImage(file=file_path)
+    photo = ImageTk.PhotoImage(file=file_path)
     canvas.create_image(0, 0, anchor=tk.NW, image=photo)
     x_start = y_start = x_min = y_min = x_max = y_max = 0
     rect_id = None
