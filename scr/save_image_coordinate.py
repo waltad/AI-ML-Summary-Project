@@ -28,17 +28,18 @@ def on_mouse_release(event):
     root.quit()
 
 
-def display_image(image_path):
+def display_image(image_path, root):
+    global canvas, image, photo
+    # Load the image
+    image = Image.open(image_path)
+
     # Create a Tkinter window
-    root = tk.Tk()
-    root.title("Image Viewer")
+    root = tk.Toplevel()
+    root.title("Select Frame")
 
     # Get screen dimensions
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-
-    # Load the image
-    image = Image.open(image_path)
 
     # Calculate the resized dimensions to fit the screen
     aspect_ratio = image.width / image.height
@@ -56,22 +57,19 @@ def display_image(image_path):
     # Resize the image
     image_resized = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
+    # Create a canvas to display the image
+    canvas = tk.Canvas(
+        root,
+        width=new_width,
+        height=new_height
+    )
+    canvas.pack()
+
     # Convert the image to a format Tkinter can use
     photo = ImageTk.PhotoImage(image_resized)
 
-    # Create a canvas to display the image
-    canvas = tk.Canvas(root, width=new_width, height=new_height)
-    canvas.pack()
-
     # Display the image in the canvas
     canvas.create_image(0, 0, anchor=tk.NW, image=photo)
-
-    # Add an Exit button
-    exit_button = tk.Button(root, text="Exit", command=root.destroy)
-    exit_button.pack()
-
-    # Run the Tkinter main loop
-    root.mainloop()
 
 
 def save_image_with_coordinates(
@@ -133,21 +131,8 @@ while True:
         print("No file selected. Exiting program.")
         sys.exit()  # End the program
 
-    # display_image(file_path)
+    display_image(file_path, root)
 
-    image = Image.open(file_path)
-
-    # Create a tkinter window to select a frame
-    root2 = tk.Toplevel()
-    root2.title("Select Frame")
-    canvas = tk.Canvas(
-        root2,
-        width=image.width,
-        height=image.height
-    )
-    canvas.pack()
-    photo = ImageTk.PhotoImage(file=file_path)
-    canvas.create_image(0, 0, anchor=tk.NW, image=photo)
     x_start = y_start = x_min = y_min = x_max = y_max = 0
     rect_id = None
 
@@ -183,4 +168,4 @@ while True:
 
         save_coordinates_as_xml(output_dir, image_name, coordinates)
 
-    root2.destroy()
+    root.destroy()
