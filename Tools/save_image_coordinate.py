@@ -9,7 +9,7 @@ import os, sys
 # Function to let the user select a rectangular frame
 def on_mouse_click(event):
     global x_start, y_start, rect_id
-    x_start, y_start = event.x, event.y
+    x_start, y_start = canvas.canvasx(event.x), canvas.canvasy(event.y)
     rect_id = canvas.create_rectangle(
         x_start, y_start, x_start, y_start, outline="red", width=2
     )
@@ -17,19 +17,19 @@ def on_mouse_click(event):
 
 def on_mouse_drag(event):
     global x_start, y_start, rect_id
-    x_end, y_end = event.x, event.y
+    x_end, y_end = canvas.canvasx(event.x), canvas.canvasy(event.y)
     canvas.coords(rect_id, x_start, y_start, x_end, y_end)
 
 
 def on_mouse_release(event):
     global x_start, y_start, rect_id, x_min, y_min, x_max, y_max
-    x_min, y_min = min(x_start, event.x), min(y_start, event.y)
-    x_max, y_max = max(x_start, event.x), max(y_start, event.y)
+    x_min, y_min = min(x_start, canvas.canvasx(event.x)), min(y_start, canvas.canvasy(event.y))
+    x_max, y_max = max(x_start, canvas.canvasx(event.x)), max(y_start, canvas.canvasy(event.y))
     root.quit()
 
 
 def display_image(image_path, root):
-    global canvas, image, photo
+    global canvas, image, photo, scale_x, scale_y
     # Load the image
     image = Image.open(image_path)
 
@@ -54,6 +54,10 @@ def display_image(image_path, root):
         # Image fits within the screen, no resizing needed
         new_width, new_height = image.width, image.height
 
+    # Calculate scale factors
+    scale_x = image.width / new_width
+    scale_y = image.height / new_height
+
     # Resize the image
     image_resized = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
@@ -73,20 +77,21 @@ def display_image(image_path, root):
 
 
 def save_image_with_coordinates(
-    directory, file_name, image, x_min, y_min, x_max, y_max
+    directory, file_name, image, coordinates
 ):
+    xmin, ymin, xmax, ymax = coordinates['xmin'], coordinates['ymin'], coordinates['xmax'], coordinates['ymax']
     draw = ImageDraw.Draw(image)
-    text = f"Xmin: {x_min}, Ymin: {y_min}, Xmax: {x_max}, Ymax: {y_max}"
+    text = f"xmin: {xmin}, ymin: {ymin}, xmax: {xmax}, ymax: {ymax}"
     font = (
         ImageFont.load_default()
     )  # You can replace this with a .ttf font if available
     draw.rectangle(
-        [x_min, y_min, x_max, y_max],
+        [xmin, ymin, xmax, ymax],
         outline="red",
         width=3
     )
     draw.text(
-        (x_min, y_min - 10),
+        (xmin, ymin - 10),
         text,
         fill="red",
         font=font
@@ -106,10 +111,10 @@ def save_coordinates_as_json(directory, file_name, coordinates):
 def save_coordinates_as_xml(directory, file_name, coordinates):
     xml_filename = os.path.join(directory, f"{file_name}.xml")
     root = ET.Element("Coordinates")
-    ET.SubElement(root, "Xmin").text = str(coordinates["Xmin"])
-    ET.SubElement(root, "Ymin").text = str(coordinates["Ymin"])
-    ET.SubElement(root, "Xmax").text = str(coordinates["Xmax"])
-    ET.SubElement(root, "Ymax").text = str(coordinates["Ymax"])
+    ET.SubElement(root, "xmin").text = str(coordinates["xmin"])
+    ET.SubElement(root, "ymin").text = str(coordinates["ymin"])
+    ET.SubElement(root, "xmax").text = str(coordinates["xmax"])
+    ET.SubElement(root, "ymax").text = str(coordinates["ymax"])
     tree = ET.ElementTree(root)
     with open(xml_filename, "wb") as xml_file:
         tree.write(xml_file)
@@ -154,17 +159,23 @@ while True:
             output_dir, exist_ok=True
         )  # Create the directory if it doesn't exist
 
-        save_image_with_coordinates(
-            output_dir, image_name, image, x_min, y_min, x_max, y_max
-        )
+        # Convert coordinates to original image dimensions
+        x_min_original = int(x_min * scale_x)
+        y_min_original = int(y_min * scale_y)
+        x_max_original = int(x_max * scale_x)
+        y_max_original = int(y_max * scale_y)
 
         # Coordinates
         coordinates = {
-            "Xmin": x_min,
-            "Ymin": y_min,
-            "Xmax": x_max,
-            "Ymax": y_max
+            "xmin": x_min_original,
+            "ymin": y_min_original,
+            "xmax": x_max_original,
+            "ymax": y_max_original
         }
+
+        save_image_with_coordinates(
+            output_dir, image_name, image, coordinates
+        )
 
         save_coordinates_as_json(output_dir, image_name, coordinates)
 
