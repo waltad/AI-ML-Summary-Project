@@ -118,6 +118,8 @@ def save_coordinates_as_xml(directory, file_name, coordinates):
 
 while True:
     # Select an image
+    file_path = None
+    
     root = tk.Tk()
     root.withdraw()
 
